@@ -1,72 +1,3 @@
-# PySpark Tutorial Practice
-
-This repository contains my hands-on practice and notes from the Udemy course: **PySpark tutorial with 40+ hands-on examples of analyzing large data sets on your desktop or on Hadoop with Python!**
-
-
-## 🎯 Purpose
-
-The goal of this repository is to consolidate my learning by practicing code examples from the course, section by section.
-
-
-## 📘 Course Overview
-
-The course covers a wide range of PySpark topics and includes numerous hands-on examples for analyzing large datasets either locally or on a Hadoop cluster. It focuses on practical application and building familiarity with PySpark's core APIs and components.
-
-
-## 📌 Notes
-
-This repository is for educational and personal learning purposes only. All code is written by me while following along with the course material, with some custom additions where applicable.
-
-
-## 📜 License
-
-This project is open for learning and sharing. Respect the original course and instructor’s rights.
-
-
-## 📂 Repository Structure
-
-Each folder or script in this repo corresponds to a specific topic, section, or exercise from the course. Topics include but are not limited to :
-- PySpark Basics
-- DataFrames and SQL
-- RDD Operations
-- Data Cleaning and Transformation
-- Working with Hadoop (optional parts)
-- Real-world Data Analysis Examples
-
-
-## 🛠 Requirements
-
-The examples in this repository were tested using the following versions:
-
-- 🐍 **Python** : 3.10.10  
-- ⚙️ **Apache Spark** : 3.4.4  
-- ☕ **Java (JDK)** : 17.0.10
-
-
-## 💻 Environment Setup
-
-The working environment was prepared following the instructions provided at : 
-[https://www.sundog-education.com/spark-python/](https://www.sundog-education.com/spark-python/)
-
-### 1️⃣ Install Java Development Kit (JDK)
-
-- Download and install JDK version **17.0.10** from : [https://www.oracle.com/java/technologies/downloads/](https://www.oracle.com/java/technologies/downloads/)
-
-### 2️⃣ Download Apache Spark
-
-- Link : [https://spark.apache.org/downloads.html](https://spark.apache.org/downloads.html)
-- Spark release **3.4.4**,
-- Package type : **Pre-built for Apache Hadoop 3.3 and later**
-
-### 3️⃣ Extract Resources and Set Environment Variables
-
-The following PowerShell script can be used to automatically extract the resources and configure the system environment :
-
-<details>
-<summary>📜 Click to expand PowerShell setup script</summary>
-
-```powershell
-
 # ---------------------------------------------
 # Configure paths and resource names
 # ---------------------------------------------
@@ -76,12 +7,12 @@ $hadoop_name = "hadoop"
 $spark_name = "spark-3.4.4-bin-hadoop3"
 
 # Define paths to the compressed resources
-$hadoop_archive_path = "~\Downloads\$hadoop_name.zip"
-$spark_archive_path  = "~\Downloads\$spark_name.tgz"
+$hadoop_archive_path = "C:\Users\balah\Downloads\$hadoop_name.zip"
+$spark_archive_path  = "C:\Users\balah\Downloads\$spark_name.tgz"
 
 # Define target extraction directories
-$hadoop_target_path = "C:\Hadoop"
-$spark_target_path  = "C:\Spark"
+$hadoop_target_path = "C:\SH\Hadoop"
+$spark_target_path  = "C:\SH\Spark"
 $jdk_path = "C:\Program Files\Java\jdk-17"
 
 # Create a unique temporary staging folder for safe extraction
@@ -146,15 +77,3 @@ $user_paths = [System.Environment]::GetEnvironmentVariable('Path', 'User')
 if ($user_paths -notlike "*%$HADOOP_HOME%\bin*") { $user_paths = $user_paths + "%$HADOOP_HOME%\bin;" }
 if ($user_paths -notlike "*%$SPARK_HOME%\bin*") { $user_paths = $user_paths + "%$SPARK_HOME%\bin;" }
 [System.Environment]::SetEnvironmentVariable('Path', $user_paths, 'User')
-
-```
-</details>
-
-### 4️⃣ Create a Python Virtual Environment
-
-For (mention the advantages of venv), we need to create a specific virtual environment of python.
-
-```powershell
-> python -m venv venv/spark-py-3.10.10
-> venv/spark-py-3.10.10/Scripts/Activate.ps1
-```
