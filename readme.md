@@ -60,7 +60,7 @@ The working environment was prepared following the instructions provided at :
 
 ### 3️⃣ Extract Resources and Set Environment Variables
 
-You can use the following PowerShell script to automatically extract the resources and configure your system environment :
+The following PowerShell script can be used to automatically extract the resources and configure the system environment :
 
 <details>
 <summary>📜 Click to expand PowerShell setup script</summary>
