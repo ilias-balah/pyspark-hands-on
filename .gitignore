@@ -1,8 +1,17 @@
-# Python egg metadata
-*.egg-info/ 
+# Python build artifacts
+build/
+dist/
+*.egg-info/
 
-# Python virtual environments
+# Compiled bytecode files
+__pycache__/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Virtual environments
 venv/
 
-# Data files
-data/
+# Private files
+data/csv/*

@@ -23,6 +23,6 @@ setup(
     name='spark-handson',
     version='0.1',
     author='Ilias',
-    packages=find_packages(),
+    packages=['src.internal'],
     install_requires=read_requirements()
 )
