@@ -1,1 +1,8 @@
+# Python egg metadata
+*.egg-info/ 
+
+# Python virtual environments
 venv/
+
+# Data files
+data/
