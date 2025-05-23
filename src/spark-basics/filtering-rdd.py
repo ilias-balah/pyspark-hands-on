@@ -48,14 +48,17 @@ if __name__ == "__main__":
         data = lines.map(parse_line)
 
         # Filter out non-TMIN/TMAX records
-        tmin_data = data.filter(lambda record: record[1] in ('TMIN', 'TMAX'))
+        temp_data = data.filter(lambda record: record[1] in ('TMIN', 'TMAX'))
 
 
 
         # Get the minimum/maximum temperature for each station over the entire dataset
         minmax_temps = (
+            # Map to (station_id, value) pairs
+            # NOTE: The temperature values are in tenths of degrees Celsius, so we divide by 10
+            temp_data.map(lambda record: (record[0], record[2] * 0.1))
             # Map to (station_id, (value, value)) pairs
-            tmin_data.map(lambda record: (record[0], (record[2], record[2])))
+            .mapValues(lambda value: (value, value))
             # Reduce by key to find the minimum and maximum temperature for each station
             # NOTE: As, for each station, the maximum is always greater than the minimum,
             # we can calculate both values in a single pass.
@@ -70,4 +73,4 @@ if __name__ == "__main__":
 
         # Collect and print the results
         for station_id, (min_temp, max_temp) in minmax_temps.collect():
-            print(f"Station ID : {station_id}, Minimum/Maximum Temperature : {min_temp:.2f}/{max_temp:.2f}")
+            print(f"Station ID : {station_id}, Minimum/Maximum Temperature : {min_temp:.2f}°C /{max_temp:.2f}°C")
