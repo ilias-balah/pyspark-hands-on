@@ -1,6 +1,6 @@
 """
 Practice the `filter` function to remove elements from an RDD : Compute
-the minimum temperature for each weather station.
+the minimum and the maximum temperature for each weather station.
 """
 from src.internal.proxy_spark_context import ProxySparkContext
 
@@ -47,17 +47,27 @@ if __name__ == "__main__":
         # (station_id, element, value)
         data = lines.map(parse_line)
 
-        # Filter out non-TMIN records
-        tmin_data = data.filter(lambda record: record[1] == 'TMIN')
+        # Filter out non-TMIN/TMAX records
+        tmin_data = data.filter(lambda record: record[1] in ('TMIN', 'TMAX'))
 
-        # Get the minimum temperature for each station over the entire dataset
-        min_temps = (
-            # Map to (station_id, value) pairs
-            tmin_data.map(lambda record: (record[0], record[2]))
-            # Reduce by key to find the minimum temperature for each station
-            .reduceByKey(lambda a, b: min(a, b))
+
+
+        # Get the minimum/maximum temperature for each station over the entire dataset
+        minmax_temps = (
+            # Map to (station_id, (value, value)) pairs
+            tmin_data.map(lambda record: (record[0], (record[2], record[2])))
+            # Reduce by key to find the minimum and maximum temperature for each station
+            # NOTE: As, for each station, the maximum is always greater than the minimum,
+            # we can calculate both values in a single pass.
+            .reduceByKey(lambda a, b: (min(a[0], b[0]), max(a[1], b[1])))
+            # NOTE: Alternatively, we can use combineByKey to achieve the same result
+            # .combineByKey(
+            #     lambda value: (value, value),  # Create initial tuple (min, max)
+            #     lambda acc, value: (min(acc[0], value), max(acc[1], value)),  # Update tuple
+            #     lambda acc1, acc2: (min(acc1[0], acc2[0]), max(acc1[1], acc2[1]))  # Merge tuples
+            # )
         )
 
         # Collect and print the results
-        for station_id, min_temp in min_temps.collect():
-            print(f"Station ID : {station_id}, Minimum Temperature : {min_temp:.2f}")
+        for station_id, (min_temp, max_temp) in minmax_temps.collect():
+            print(f"Station ID : {station_id}, Minimum/Maximum Temperature : {min_temp:.2f}/{max_temp:.2f}")
