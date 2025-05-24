@@ -16,3 +16,4 @@ venv/
 # Private files
 data/csv/*
 data/ml-100k/*
+data/text/*
