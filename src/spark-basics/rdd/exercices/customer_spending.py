@@ -28,6 +28,10 @@ if __name__ == '__main__':
                 .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
         )
 
-        # Print the total spending for each customer.
-        for customer_id, (order_count, total_spending) in spendings.collect():
+        # Sort the spendings by total spending in descending order.
+        sorted_spendings = spendings.sortBy(lambda record: record[1][1], ascending=False)
+
+        # Collect the results and print them.
+        for customer_id, (order_count, total_spending) in sorted_spendings.collect():
+            # Print the customer id, total spending, and number of orders.
             print(f"Customer {customer_id} has spend ${total_spending:.2f} for {order_count} orders.")
