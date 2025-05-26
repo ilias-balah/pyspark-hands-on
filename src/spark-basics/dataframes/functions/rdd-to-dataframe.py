@@ -42,8 +42,11 @@ if __name__ == '__main__':
         dataframe.createOrReplaceTempView("fake_friends")
 
         # Excute a SQL query to get the teenagers in the DataFrame.
-        # NOTE: The results of the query are also a DataFrame.
-        teenagers = spark.sql("SELECT * FROM fake_friends WHERE age >= 13 AND age <= 19 ORDER BY age")
+        # NOTE: The results of a `spark.sql` query are also a DataFrame.
+        teenagers_with_sql = spark.sql("SELECT * FROM fake_friends WHERE age >= 13 AND age <= 19 ORDER BY age, num_friends ASC")
 
-        # Show the results.
-        print(teenagers.__class__.__name__)  # This will be 'DataFrame'
+        # NOTE: Alternatively, we can use pre-defined functions to query the DataFrame.
+        teenagers_with_funcs = dataframe.filter("age >= 13 AND age <= 19").orderBy("age", "num_friends", ascending=True)
+
+        # Ensure that both methods yield the same results.
+        assert teenagers_with_funcs.toPandas().eq(teenagers_with_sql.toPandas()).all().all()
