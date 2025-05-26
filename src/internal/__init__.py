@@ -1,1 +1,2 @@
 from .proxy_spark_context import ProxySparkContext
+from .proxy_spark_session import ProxySparkSession

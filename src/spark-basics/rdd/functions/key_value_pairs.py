@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
         # Load the CSV file into an RDD.
         # NOTE: Each line in the file follows this format : id, name, age, num_friends
-        lines = spark_context.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake_friends.csv")
+        lines = spark_context.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake-friends.csv")
 
         # Convert each line into (age, num_friends) pairs.
         data = lines.map(parse_line)

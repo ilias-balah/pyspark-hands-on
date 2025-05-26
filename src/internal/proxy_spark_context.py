@@ -1,5 +1,6 @@
 from pyspark import SparkContext
 
+
 class ProxySparkContext(SparkContext):
     """
     A proxy class for SparkContext that enhances context management and logging behavior.
@@ -28,3 +29,9 @@ class ProxySparkContext(SparkContext):
         self.setLogLevel('ERROR')
         print("", "> Spark Context {} created successfully.".format(self.appName), "", sep="\n")
         return self
+    
+    def __exit__(self, type, value, trace):
+        """
+        Exit the runtime context, ensuring proper cleanup of the Spark context.
+        """
+        return super().__exit__(type, value, trace)
