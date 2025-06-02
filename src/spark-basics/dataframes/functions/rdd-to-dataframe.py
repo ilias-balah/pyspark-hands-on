@@ -3,6 +3,7 @@ Practice pySpaek dataframes by converting an RDD to a DataFrame.
 """
 from src.internal.proxy_spark_session import ProxySparkSession, Row, DataFrame
 
+
 if __name__ == '__main__':
 
     with ProxySparkSession.builder.appName("Test Spark Session").getOrCreate() as spark:
