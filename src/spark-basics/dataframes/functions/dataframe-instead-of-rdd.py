@@ -7,9 +7,7 @@ from src.internal.proxy_spark_session import ProxySparkSession
 
 if __name__ == '__main__':
 
-    with ProxySparkSession.builder.appName("Test Dataframes instead of RDDs").getOrCreate() as spark:
-
-        spark: ProxySparkSession
+    with ProxySparkSession("Test Dataframes instead of RDDs") as spark:
 
         # Read the fake friends CSV file into a DataFrame.
         dataframe = spark.read.csv("file:///Users/balah/Desktop/Spark/data/csv/fake-friends-with-header.csv", header=True, inferSchema=True)

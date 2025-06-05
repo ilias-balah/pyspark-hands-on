@@ -8,9 +8,7 @@ from src.internal.proxy_spark_session import ProxySparkSession
 
 if __name__ == '__main__':
 
-    with ProxySparkSession.builder.appName("Test Explode Function").getOrCreate() as spark:
-
-        spark: ProxySparkSession
+    with ProxySparkSession("Explode Function") as spark:
 
         # Read the fake friends CSV file into a DataFrame.
         dataframe = spark.read.text("file:///Users/balah/Desktop/Spark/data/text/self-employment-book.txt")
