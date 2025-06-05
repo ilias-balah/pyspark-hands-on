@@ -42,9 +42,9 @@ class TimeUtils:
         return datetime.now().strftime(format or '%Y-%m-%d %H:%M:%S.%f')
     
     @staticmethod
-    def get_delta_microseconds(start_time: datetime, end_time: datetime = None) -> int:
+    def get_delta_seconds(start_time: datetime, end_time: datetime = None) -> int:
         """
-        Calculate the difference in microseconds between two datetime objects.
+        Calculate the difference in seconds between two datetime objects.
 
         Parameters
         ----------
@@ -57,12 +57,12 @@ class TimeUtils:
         Returns
         -------
         int
-            The difference in microseconds.
+            The difference in seconds.
         """
         # If end_time is not provided, use the current time.
         if end_time is None:
             end_time = datetime.now()
         
-        # Calculate the difference in seconds and convert to microseconds.
-        return (end_time - start_time).microseconds
+        # Calculate the difference in seconds
+        return (end_time - start_time).total_seconds()
 
