@@ -1,8 +1,6 @@
 """
 Exercice, to calculate the minimum temperature for each year in a given dataset.
 """
-from pyspark.sql import functions as funcs
-# from pyspark.sql.types import StructField
 from pyspark.sql import types as st
 from src.internal.proxy_spark_session import ProxySparkSession
 from src.internal.utils.spark_function_helpers import apply_spark_function_with_alias
@@ -30,11 +28,11 @@ if __name__ == '__main__':
         # dataFrame as a temporary view first.
         dataframe.createTempView("temperature_table")
         spark.sql("""
-            SELECT station_id, min(value) * 0.1 as min_value
+            SELECT station_id, MIN(value) * 0.1 AS min_value
             FROM temperature_table
             WHERE element_type = 'TMIN'
             GROUP BY station_id
-            ORDER BY min(value)
+            ORDER BY MIN(value)
         """)\
             .show()
 
