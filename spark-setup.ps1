@@ -1,18 +1,24 @@
+[CmdletBinding()]
+param (
+    [Parameter(HelpMessage="Version of Spark to use")]
+    [string]$spark_version = "3.4.4"
+)
+
 # ---------------------------------------------
-# Configure paths and resource names
+# Configure paths, resource names and versions
 # ---------------------------------------------
 
 # Define resource names
 $hadoop_name = "hadoop"
-$spark_name = "spark-3.4.4-bin-hadoop3"
+$spark_name = "spark-$spark_version-bin-hadoop3"
 
 # Define paths to the compressed resources
 $hadoop_archive_path = "C:\Users\balah\Downloads\$hadoop_name.zip"
 $spark_archive_path  = "C:\Users\balah\Downloads\$spark_name.tgz"
 
 # Define target extraction directories
-$hadoop_target_path = "C:\SH\Hadoop"
-$spark_target_path  = "C:\SH\Spark"
+$hadoop_target_path = "C:\spark\hadoop"
+$spark_target_path  = "C:\spark\spark-$spark_version"
 $jdk_path = "C:\Program Files\Java\jdk-17"
 
 # Create a unique temporary staging folder for safe extraction
