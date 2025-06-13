@@ -90,7 +90,7 @@ class LoggerUtils:
         # If the logger has no handlers, add a default handler with colored output.
         if not logger.hasHandlers():
             handler = logging.StreamHandler()
-            formatter = cls.ColoredFormatter('[%(asctime)s] [%(levelname)s] %(message)s', '%Y-%m-%d %H:%M:%S')
+            formatter = cls.ColoredFormatter('[%(asctime)s] [%(levelname)-8s] %(message)s', '%Y-%m-%d %H:%M:%S')
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
