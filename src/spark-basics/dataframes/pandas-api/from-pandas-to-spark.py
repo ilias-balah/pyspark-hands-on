@@ -5,8 +5,7 @@
 # you but it does not work if there is a Spark context already launched.` we
 # need to set the environment variable before importing pyspark.pandas.
 import os; os.environ['PYARROW_IGNORE_TIMEZONE'] = '1'
-# NOTE: To use pandas on Spark, we need to disable the ANSI mode
-import pyspark.pandas as ps; ps.options.compute.fail_on_ansi_mode = False
+import pyspark.pandas as ps
 import pandas as pd
 
 from src.internal.proxy_spark_session import ProxySparkSession
@@ -31,6 +30,8 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------
     # Convert the pandas Dataframe to a spark dataframe using pandas API on Spark
     # ---------------------------------------------------------------------------
+    # NOTE: To use pandas on Spark, we need to disable the ANSI mode
+    ps.options.compute.fail_on_ansi_mode = False
     spark_df = ps.from_pandas(pandas_df).to_spark()
 
     # Show the created Spark dataframe
