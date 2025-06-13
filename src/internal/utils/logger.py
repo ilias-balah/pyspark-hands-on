@@ -16,6 +16,7 @@ ANSI_COLORS = {
 
 # Define a mapping of log levels to their corresponding ANSI colors
 LOG_LEVELS_COLORS: dict[str, dict] = {
+    'print':    ANSI_COLORS["black"],
     'debug':    ANSI_COLORS["cyan"],
     'info':     ANSI_COLORS["green"],
     'warning':  ANSI_COLORS["yellow"],
@@ -32,13 +33,22 @@ class LoggerUtils:
     A utility class for logging operations.    
     """
 
+    # A custom print level for logging, lower than DEBUG.
+    PRINT_LEVEL: int = 9
+    PRINT_LEVEL_NAME: str = 'PRINT'
+
+    # Define a custom method for the print level
+    def print_function(self: logging.Logger, message, *args, **kwargs):
+        if self.isEnabledFor(LoggerUtils.PRINT_LEVEL):
+            self.log(LoggerUtils.PRINT_LEVEL, message, *args, **kwargs)
+
     class ColoredFormatter(logging.Formatter):
         """
         Custom formatter to add colors to log messages.
         """
 
         # Define the available log levels
-        available_log_levels = ['debug', 'info', 'warning', 'error', 'critical']
+        available_log_levels = ['print', 'debug', 'info', 'warning', 'error', 'critical']
 
         # ANSI escape sequences for colors
         ansi_escape_sequences = {
@@ -65,7 +75,17 @@ class LoggerUtils:
         """
         Get a logger with the specified name.
         """
+        # Add the print level to the logger if it doesn't already exist
+        if not hasattr(logging, cls.PRINT_LEVEL_NAME):
+            logging.addLevelName(cls.PRINT_LEVEL, cls.PRINT_LEVEL_NAME)
+            logging.Logger.print = cls.print_function
+            setattr(logging, cls.PRINT_LEVEL_NAME, cls.PRINT_LEVEL)
+
+        # Create a logger with the specified name
         logger = logging.getLogger(name)
+
+        # Always set the logger to PRINT level by default
+        logger.setLevel(logging.PRINT)
 
         # If the logger has no handlers, add a default handler with colored output.
         if not logger.hasHandlers():
@@ -73,10 +93,6 @@ class LoggerUtils:
             formatter = cls.ColoredFormatter('[%(asctime)s] [%(levelname)s] %(message)s', '%Y-%m-%d %H:%M:%S')
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-            logger.setLevel(logging.DEBUG)
-
-        # Set the logger to the desired level
-        logger.setLevel(logging.DEBUG)
 
         # Return the configured logger
         return logger
@@ -88,7 +104,7 @@ class LoggerUtils:
         """
         logger = cls.get_logger("test_logger")
         # Log messages at different levels
-        logger.log(0, "This is a debug message.")
+        logger.print("This is a log message.")
         logger.debug("This is a debug message.")
         logger.info("This is an info message.")
         logger.warning("This is a warning message.")
