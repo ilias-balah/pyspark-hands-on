@@ -33,6 +33,9 @@ class LoggerUtils:
     A utility class for logging operations.    
     """
 
+    # Add the Logger type for development use.
+    class Logger(logging.Logger): ...
+
     # A custom print level for logging, lower than DEBUG.
     PRINT_LEVEL: int = 9
     PRINT_LEVEL_NAME: str = 'PRINT'
@@ -84,7 +87,7 @@ class LoggerUtils:
         # Create a logger with the specified name
         logger = logging.getLogger(name)
 
-        # Always set the logger to PRINT level by default
+        # Always set the logger's level to PRINT
         logger.setLevel(logging.PRINT)
 
         # If the logger has no handlers, add a default handler with colored output.
