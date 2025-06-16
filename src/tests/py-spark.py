@@ -1,5 +1,5 @@
 from pyspark import SparkContext, SparkConf
-from src.internal.utils.logger import LoggerUtils
+from src.logs import logging_utils
 
 
 def assert_spark_context_appname(spark_context: SparkContext, expected_app_name: str):
@@ -32,7 +32,7 @@ def test_spark_context():
 if __name__ == "__main__":
 
     # Initialize logger
-    logger = LoggerUtils.get_logger(__name__)
+    logger = logging_utils.get_logger(__name__)
 
     try:
         test_spark_context()

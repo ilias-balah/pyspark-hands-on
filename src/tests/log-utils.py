@@ -1,8 +1,7 @@
-from src.logs import LogUtils
+from src.logs import logging_utils
 
 
 if __name__ == "__main__":
     
     # Run the test for the colored formatter
-    print("Testing Formatter ...")
-    LogUtils.test_colored_formatter()
+    logging_utils.test_colored_formatter()

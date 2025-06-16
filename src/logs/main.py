@@ -120,6 +120,7 @@ class Main:
         """
         logger = cls.get_logger("test_logger")
         # Log messages at different levels
+        logger.print("Testing colored (by levels) logging :", as_log = False)
         logger.print("This is a log message.")
         logger.debug("This is a debug message.")
         logger.info("This is an info message.")

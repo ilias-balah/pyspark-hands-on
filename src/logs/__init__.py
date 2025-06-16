@@ -1,1 +1,1 @@
-from .main import Main as LogUtils
+from .main import Main as logging_utils
