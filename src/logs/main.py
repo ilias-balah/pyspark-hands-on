@@ -2,6 +2,7 @@ import logging as python_logging
 # NOTE: We used the the name python_logging to avoid any probable
 # confusion between the default module and this customized one.
 from .defaults import ANSI_ESCAPE_CHARACTER, LOG_LEVELS_COLORS
+from ..utils.strings import camel_to_snake
 
 
 class Logger(python_logging.Logger):
@@ -54,8 +55,47 @@ class Main:
     PRINT_LEVEL: int = 9
     PRINT_LEVEL_NAME: str = 'PRINT'
 
+    # Short-cut to the built-in logger and Formatter from the python's logging modudle.
+    Logger = Logger
+    Formatter = Formatter
+
+    def validate_name(name: str = None) -> str:
+        """
+        Validate and transform a logger name into a safe identifier format.
+
+        Converts the provided name to lowercase, replaces spaces with underscores,
+        and checks if the result is a valid Python identifier. If valid, prefixes it
+        with 'logger__' and returns it.
+
+        Parameters
+        ----------
+        name : str, optional
+            A custom name for the logger. If not provided, validation will fail.
+
+        Returns
+        -------
+        str
+            A sanitized logger name in the format 'logger__<identifier>'.
+
+        Raises
+        ------
+        ValueError
+            If the input is None, not a string, or cannot be converted into a valid identifier.
+        """
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("Logger name must be a non-empty string.")
+
+        sanitized = camel_to_snake(name).lower().strip().replace(' ', '_')
+
+        if sanitized.isidentifier():
+            return 'logger__{}'.format(sanitized)
+
+        raise ValueError("Logger name '{}' is not a valid Python "
+                         "identifier after sanitization."
+                         .format(name))
+
     # Define a custom method for the print level
-    def print_function(self: Logger, message, *args, **kwargs):
+    def print_function(self: 'Main.Logger', message, *args, **kwargs):
         """
         Custom print function that either logs a message at the PRINT
         level or prints it directly.
@@ -87,7 +127,7 @@ class Main:
             self.log(Main.PRINT_LEVEL, message, *args, **kwargs)
 
     @classmethod
-    def get_logger(cls, name: str) -> Logger:
+    def get_logger(cls, name: str) -> 'Main.Logger':
         """
         Get a logger with the specified name.
         """
@@ -98,7 +138,7 @@ class Main:
             setattr(python_logging, cls.PRINT_LEVEL_NAME, cls.PRINT_LEVEL)
 
         # Create a logger with the specified name
-        logger = python_logging.getLogger(name)
+        logger = python_logging.getLogger(cls.validate_name(name))
 
         # Always set the logger's level to PRINT
         logger.setLevel(python_logging.PRINT)
@@ -112,18 +152,27 @@ class Main:
 
         # Return the configured logger
         return logger
-        
+            
     @classmethod
     def test_colored_formatter(cls):
         """
-        Test the Formatter to ensure it formats messages correctly.
+        Test the custom log formatter by emitting sample log messages
+        at all standard log levels, including the custom PRINT level.
+
+        This helps visually verify that ANSI color codes are applied correctly
+        according to log severity and that the logger is functioning as expected.
         """
-        logger = cls.get_logger("test_logger")
-        # Log messages at different levels
-        logger.print("Testing colored (by levels) logging :", as_log = False)
-        logger.print("This is a log message.")
-        logger.debug("This is a debug message.")
-        logger.info("This is an info message.")
-        logger.warning("This is a warning message.")
-        logger.error("This is an error message.")
-        logger.critical("This is a critical message.")
+        logger = cls.get_logger("test_formatter")
+
+        # Log raw message using normal print (not captured by logger)
+        h_placeholder, dash = "Testing the custom log formatter ({}) ...", "-"
+        logger.print("\n{}\n{}".format(___ := h_placeholder.format(logger.name), dash * ___.__len__()), as_log=False)
+
+        logger.print("Custom PRINT level message.")
+        logger.debug("DEBUG level message.")
+        logger.info("INFO level message.")
+        logger.warning("WARNING level message.")
+        logger.error("ERROR level message.")
+        logger.critical("CRITICAL level message.")
+
+        logger.print("Finished.\n", as_log=False)
