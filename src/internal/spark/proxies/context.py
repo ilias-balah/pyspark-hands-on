@@ -1,20 +1,20 @@
-from src.internal.spark.session import SparkSession
+from src.internal.spark.context import SparkContext
 from src.internal.spark.configs import SparkConf
 from src.logs import logging_utils
 from src.utils import time_utils
 
 
-class SparkSessionProxy:
+class SparkContextProxy:
     """
     A context manager-based proxy for managing the lifecycle of a
-    SparkSession.
+    SparkContext.
 
     This class simplifies the creation, configuration, and shutdown
-    of a SparkSession, while adding enhanced logging, structured
+    of a SparkContext, while adding enhanced logging, structured
     configuration handling, and support for measuring execution time.
 
     Ideal for use in scripts and applications where a reliable, configurable,
-    and debuggable SparkSession setup is needed.
+    and debuggable SparkContext setup is needed.
     """
 
     # Logger used throughout the lifecycle of the proxy
@@ -36,7 +36,7 @@ class SparkSessionProxy:
         self.configs: dict = self._get_configs(app_name = app_name, **config_options)
         self.start_time: time_utils.time_type = time_utils.get_current_time()
         self.end_time: time_utils.time_type = None
-        self.session: SparkSession = None
+        self.context: SparkContext = None
 
     def _get_configs(self, app_name: str = None, **overrides) -> dict:
         """
@@ -61,10 +61,10 @@ class SparkSessionProxy:
         ValueError
             If any configuration key is not a string or any value is None.
         """
-        configs = SparkConf.Defaults.session.copy()
+        configs = SparkConf.Defaults.context.copy()
 
         # Set application name if provided
-        configs["spark.app.name"] = app_name or SparkSession.Defaults.app_name
+        configs["spark.app.name"] = app_name
 
         # Update with any additional user-specified configuration overrides
         for key, value in overrides.items():
@@ -80,70 +80,69 @@ class SparkSessionProxy:
     @property
     def configs_app_name(self):
         """
-        Retrieve the application name as defined in the configuration dictionary.
+        Return the Spark application name as defined in the configuration dictionary.
 
         Returns
         -------
         str or None
-            The application name if set; otherwise, None.
+            The configured application name, or None if not set.
         """
         return self.configs.get('spark.app.name', None)
 
     @property
-    def session_app_name(self) -> str:
+    def context_app_name(self) -> str:
         """
-        Retrieve the application name from the active Spark session's context.
+        Retrieve the actual application name from the SparkContext.
 
         Returns
         -------
         str
-            The application name from the Spark session's SparkContext.
+            The name reported by the active SparkContext.
 
         Raises
         ------
         RuntimeError
-            If the Spark session is not initialized or has been stopped.
+            If the SparkContext has not been initialized.
         """
-        if self.session is None:
+        if self.context is None:
             raise RuntimeError("Cannot retrieve the application name as the "
-                               "Spark session is not initialized or has been stopped.")
-        return self.session.sparkContext.appName
+                               "Spark context is not initialized or has been stopped.")
+        return self.context.appName
 
-    def start(self) -> 'SparkSessionProxy':
+    def start(self) -> 'SparkContextProxy':
         """
-        Initialize and start a Spark session using the provided or
-        default configurations.
+        Create or retrieve a SparkContext using the defined configurations.
 
-        The session is stored internally and can be accessed through
-        the `session` attribute.
+        This method configures the SparkConf object and assigns the resulting
+        context to the proxy.
 
         Returns
         -------
-        SparkSessionProxy
-            The instance itself, allowing for method chaining.
+        SparkContextProxy
+            The proxy instance itself, supporting method chaining.
         """
-        self.logger.debug("Starting a new Spark session ...")
+        self.logger.debug("Starting a new Spark context ...")
 
-        # Prepare the Spark session builder
-        builder = SparkSession.builder
+        # Prepare the Spark configuration
+        conf = SparkConf()
 
         # Set each configuration property in the builder
         for key, value in self.configs.items():
             # Use try-except to catch invalid configuartion
             try:
-                builder = builder.config(key, value)
+                conf.set(key, value)
             except Exception as e:
                 self.logger.error("Failed to set Spark config '{}' = '{}' : {}".format(key, value, e))
                 self.logger.print("Traceback:", exc_info=True)
 
-        # Attempt to retrieve or create a Spark session, and assign it
+        # Attempt to retrieve or create a Spark context, and assign it
         # to the proxy
         try:
-            self.session = builder.getOrCreate()
-            self.logger.debug("Spark session '{}' created successfully.".format(self.configs_app_name))
+            self.context = SparkContext.getOrCreate(conf=conf)
+            self.logger.debug("Spark context '{}' created successfully.".format(self.configs_app_name))
 
         except Exception as e:
-            self.logger.error("Failed to create/retrieve Spark session : {}".format(e))
+            self.logger.error("Failed to create/retrieve Spark context : {}".format(e))
             self.logger.print("Traceback :", exc_info=True)
 
         # Return the proxy instance, allowing method chaining
@@ -151,45 +150,49 @@ class SparkSessionProxy:
 
     def stop(self):
         """
-        Stop the Spark session if it has been initialized.
+        Stop the Spark context if it has been initialized.
 
         If an error occurs during shutdown, it is logged with traceback.
         """
         try:
-            self.session.stop()
-            self.logger.debug("Spark session '{}' stopped successfully.".format(self.session_app_name))
+            self.context.stop()
+            self.logger.debug("Spark context '{}' stopped successfully.".format(self.context_app_name))
 
         except Exception as e:
-            self.logger.error("Failed to stop the Spark session : {}".format(e))
+            self.logger.error("Failed to stop the Spark context : {}".format(e))
             self.logger.print("Traceback :", exc_info=True)
-
-    def __enter__(self) -> 'SparkSessionProxy':
+    
+    def __enter__(self) -> 'SparkContextProxy':
         """
-        Context manager entry point. Creates the spark session, and
-        returns the Proxy instance.
+        Enter the context manager and start the SparkContext.
+
+        Returns
+        -------
+        SparkContextProxy
+            The proxy instance with an active SparkContext.
         """
         return self.start()
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """
-        Context manager exit point. Handles errors and terminates the
-        Spark session.
+        Exit the context manager, handle any raised exceptions, and stop
+        the SparkContext.
 
         Parameters
         ----------
-        exc_type : Type[BaseException] | None
-            The type of exception raised, if any.
+        exc_type : type or None
+            Type of the exception, if raised.
 
-        exc_val : BaseException | None
-            The exception instance raised.
+        exc_val : Exception or None
+            The exception instance, if any.
 
-        exc_tb : TracebackType | None
-            The traceback object associated with the exception.
+        exc_tb : TracebackType or None
+            The traceback object, if any exception occurred.
         """
         # Trace errors on exit.
         if exc_type:
             self.logger.error("Exception occurred : {} - {}".format(exc_type.__name__, exc_val))
             self.logger.print("Traceback :", exc_info=exc_tb)
 
-        # Stop the Spark session if exists.
+        # Stop the Spark context if exists.
         self.stop()

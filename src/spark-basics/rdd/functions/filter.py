@@ -2,7 +2,7 @@
 Practice the `filter` function to remove elements from an RDD : Compute
 the minimum and the maximum temperature for each weather station.
 """
-from src.internal.proxy_spark_context import ProxySparkContext
+from src.internal.spark.proxies import SparkContextProxy
 
 
 def parse_line(line: str):
@@ -35,13 +35,20 @@ def parse_line(line: str):
 
 if __name__ == "__main__":
 
-    # Use ProxySparkContext as a context manager to ensure proper resource cleanup.
-    with ProxySparkContext('local', 'Key-Value RDD') as spark_context:
+    spark_configs = dict({
+        # Set the application name
+        "spark.app.name": "Key-Value RDD",
+        # Configure for a local setup with 2 cores
+        "spark.master": "local[2]"
+    })
+
+    # Use SparkContextProxy as a context manager to ensure proper resource cleanup.
+    with SparkContextProxy(**spark_configs) as spark:
 
         # Load the CSV file into an RDD.
         # NOTE: Each line in the file follows this format : station_id, date, element, value,
         # m_flag, q_flag, s_flag, obs_time
-        lines = spark_context.textFile("file:///Users/balah/Desktop/Spark/data/csv/1800.csv")
+        lines = spark.context.textFile("file:///Users/balah/Desktop/Spark/data/csv/1800.csv")
 
         # Extract temperature records and convert each line into a tuple
         # (station_id, element, value)
@@ -73,4 +80,4 @@ if __name__ == "__main__":
 
         # Collect and print the results
         for station_id, (min_temp, max_temp) in minmax_temps.collect():
-            print(f"Station ID : {station_id}, Minimum/Maximum Temperature : {min_temp:.2f}°C /{max_temp:.2f}°C")
+            spark.logger.print(f"Station ID : {station_id}, Minimum/Maximum Temperature : {min_temp:.2f}°C /{max_temp:.2f}°C", as_log=False)

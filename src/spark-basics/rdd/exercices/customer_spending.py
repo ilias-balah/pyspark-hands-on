@@ -2,17 +2,24 @@
 Prictice the RDD API by calculating the total spending of each customer
 from a CSV file containing customer orders.
 """
-from src.internal.proxy_spark_context import ProxySparkContext
+from src.internal.spark.proxies import SparkContextProxy
 
 
 if __name__ == '__main__':
 
-    # Use ProxySparkContext as a context manager to ensure proper resource cleanup.
-    with ProxySparkContext('local', 'Customer Spending RDD') as spark_context:
+    spark_configs = dict({
+        # Set the application name
+        "spark.app.name": "Customer Spending RDD",
+        # Configure for a local setup with 2 cores
+        "spark.master": "local[2]"
+    })
+
+    # Use SparkContextProxy as a context manager to ensure proper resource cleanup.
+    with SparkContextProxy(**spark_configs) as spark:
 
         # Load the CSV file into an RDD.
         # Each line in the file follows this format: customer_id, order_id, amount
-        lines = spark_context.textFile("file:///Users/balah/Desktop/Spark/data/csv/customer-orders.csv")
+        lines = spark.context.textFile("file:///Users/balah/Desktop/Spark/data/csv/customer-orders.csv")
 
         # Parse each line to extract the customer id and amount spent.
         spendings = (
@@ -34,4 +41,4 @@ if __name__ == '__main__':
         # Collect the results and print them.
         for customer_id, (order_count, total_spending) in sorted_spendings.collect():
             # Print the customer id, total spending, and number of orders.
-            print(f"Customer {customer_id} has spend ${total_spending:.2f} for {order_count} orders.")
+            spark.logger.print(f"Customer {customer_id} has spend ${total_spending:.2f} for {order_count} orders.", as_log=False)

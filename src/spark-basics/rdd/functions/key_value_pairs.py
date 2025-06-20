@@ -1,7 +1,7 @@
 """
 Practice key-value in RDD : Compute the average number of friends by age.
 """
-from src.internal.proxy_spark_context import ProxySparkContext
+from src.internal.spark.proxies import SparkContextProxy
 
 
 def parse_line(line: str):
@@ -28,13 +28,20 @@ def parse_line(line: str):
 
 
 if __name__ == "__main__":
-    
-    # Use ProxySparkContext as a context manager to ensure proper cleanup.
-    with ProxySparkContext('local', 'Key-Value RDD') as spark_context:
+
+    spark_configs = dict({
+        # Set the application name
+        "spark.app.name": "Key-Value RDD",
+        # Configure for a local setup with 2 cores
+        "spark.master": "local[2]"
+    })
+
+    # Use SparkContextProxy as a context manager to ensure proper resource cleanup.
+    with SparkContextProxy(**spark_configs) as spark:
 
         # Load the CSV file into an RDD.
         # NOTE: Each line in the file follows this format : id, name, age, num_friends
-        lines = spark_context.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake-friends.csv")
+        lines = spark.context.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake-friends.csv")
 
         # Convert each line into (age, num_friends) pairs.
         data = lines.map(parse_line)
@@ -51,4 +58,4 @@ if __name__ == "__main__":
 
         # Collect and print results, sorted by age.
         for age, avg_friends in sorted(avg_friends_by_age.collect()):
-            print(f"Age : {age}, Average number of friends : {avg_friends:.2f}")
+            spark.logger.print(f"Age : {age}, Average number of friends : {avg_friends:.2f}", as_log=False)
