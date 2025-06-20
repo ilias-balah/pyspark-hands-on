@@ -57,3 +57,33 @@ def test_session_creation_and_properties():
     # Clean up the session after the test to avoid resource leaks.
     ssp.stop()
 
+
+def test_using_context_manager():
+    """
+    Test that the proxy correctly manages the session lifecycle when
+    used as a context manager.
+    """
+    with SparkSessionProxy("test-spark-session-proxy") as spark:
+
+        # Check that a spark session is created and assigned to 'session'
+        # attribute.
+        assert spark.session is not None, "No session created for the proxy."
+
+        # Check that the created session object is an instance of SparkSession.
+        # This confirms that the session was successfully initialized
+        # through the proxy.
+        assert isinstance(spark.session, SparkSession), ("Got unexpected type '{}' "
+                                                        "for the created session"
+                                                        .format(spark.session.__name__))
+
+        # Ensure that the active session during the context is the same as the
+        # proxy's session
+        assert SparkSession.getActiveSession() == spark.session, ("The active Spark session is "
+                                                                  "not the same as the session "
+                                                                  "assigned by the proxy.")
+
+    # After exiting the context, the session should be stopped and not
+    # retrievable as active
+    assert SparkSession.getActiveSession() is None, ("Expected no active SparkSession "
+                                                     "after context manager exited, but "
+                                                     "found one still running.")

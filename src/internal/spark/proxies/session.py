@@ -158,3 +158,34 @@ class SparkSessionProxy:
         except Exception as e:
             self.logger.error("Failed to stop the Spark session : {}".format(e))
             self.logger.print("Traceback :", exc_info=True)
+
+    def __enter__(self) -> 'SparkSessionProxy':
+        """
+        Context manager entry point. Creates the spark session, and
+        returns the Proxy instance.
+        """
+        return self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """
+        Context manager exit point. Handles errors and terminates the
+        Spark session.
+
+        Parameters
+        ----------
+        exc_type : Type[BaseException] | None
+            The type of exception raised, if any.
+
+        exc_val : BaseException | None
+            The exception instance raised.
+
+        exc_tb : TracebackType | None
+            The traceback object associated with the exception.
+        """
+        # Trace errors on exit.
+        if exc_type:
+            self.logger.error("Exception occurred : {} - {}".format(exc_type.__name__, exc_val))
+            self.logger.print("Traceback :", exc_info=exc_tb)
+
+        # Stop the Spark session if exists.
+        self.stop()
