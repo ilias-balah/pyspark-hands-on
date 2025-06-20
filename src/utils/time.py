@@ -4,7 +4,7 @@ Utility functions for Spark applications.
 from datetime import datetime
 
 
-class TimeUtils:
+class Time:
     """
     A utility class for handling time-related operations in Spark applications.
     """

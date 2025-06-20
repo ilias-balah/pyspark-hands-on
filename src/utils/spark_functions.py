@@ -64,3 +64,9 @@ def apply_spark_function_with_alias(column_name: str, spark_function_name: str, 
         transformed_column = transformed_column.alias(alias_name)            
 
     return transformed_column
+
+
+__all__ = [
+    'spark_funcs',
+    'apply_spark_function_with_alias'
+]

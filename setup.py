@@ -22,6 +22,6 @@ setup(
     name='spark-handson',
     version='0.1',
     author='Ilias',
-    packages=['src.internal'],
+    packages=['src.internal', 'src.logs', 'src.utils'],
     install_requires=read_requirements()
 )
