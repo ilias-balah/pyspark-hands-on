@@ -84,3 +84,77 @@ class SparkSessionProxy:
             The application name if set; otherwise, None.
         """
         return self.configs.get('spark.app.name', None)
+
+    @property
+    def session_app_name(self) -> str:
+        """
+        Retrieve the application name from the active Spark session's context.
+
+        Returns
+        -------
+        str
+            The application name from the Spark session's SparkContext.
+
+        Raises
+        ------
+        RuntimeError
+            If the Spark session is not initialized or has been stopped.
+        """
+        if self.session is None:
+            raise RuntimeError("Cannot retrieve the application name as the "
+                               "Spark session is not initialized or has been stopped.")
+        return self.session.sparkContext.appName
+
+    def start(self) -> 'SparkSessionProxy':
+        """
+        Initialize and start a Spark session using the provided or
+        default configurations.
+
+        The session is stored internally and can be accessed through
+        the `session` attribute.
+
+        Returns
+        -------
+        SparkSessionProxy
+            The instance itself, allowing for method chaining.
+        """
+        self.logger.debug("Starting a new Spark session ...")
+
+        # Prepare the Spark session builder
+        builder = SparkSession.builder
+
+        # Set each configuration property in the builder
+        for key, value in self.configs.items():
+            # Use try-except to catch invalid configuartion
+            try:
+                builder = builder.config(key, value)
+            except Exception as e:
+                self.logger.error("Failed to set Spark config '{}' = '{}' : {}".format(key, value, e))
+                self.logger.print("Traceback:", exc_info=True)
+
+        # Attempt to retrieve or create a Spark session, and assign it
+        # to the proxy
+        try:
+            self.session = builder.getOrCreate()
+            self.logger.debug("Spark session '{}' created successfully.".format(self.configs_app_name))
+
+        except Exception as e:
+            self.logger.error("Failed to create/retrieve Spark session : {}".format(e))
+            self.logger.print("Traceback :", exc_info=True)
+
+        # Return the proxy instance, allowing method chaining
+        return self
+
+    def stop(self):
+        """
+        Stop the Spark session if it has been initialized.
+
+        If an error occurs during shutdown, it is logged with traceback.
+        """
+        try:
+            self.session.stop()
+            self.logger.debug("Spark session '{}' stopped successfully.".format(self.session_app_name))
+
+        except Exception as e:
+            self.logger.error("Failed to stop the Spark session : {}".format(e))
+            self.logger.print("Traceback :", exc_info=True)
