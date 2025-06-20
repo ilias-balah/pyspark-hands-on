@@ -2,16 +2,16 @@
 Practice using the explode, and other functions from the
 pyspark.sql.functions module to manipulate DataFrames.
 """
-from pyspark.sql import functions as funcs
-from src.internal.proxy_spark_session import ProxySparkSession
+from src.internal.spark.proxies import SparkSessionProxy
+from src.utils.spark_functions import spark_funcs
 
 
 if __name__ == '__main__':
 
-    with ProxySparkSession("Explode Function") as spark:
+    with SparkSessionProxy("Explode Function") as spark:
 
         # Read the fake friends CSV file into a DataFrame.
-        dataframe = spark.read.text("file:///Users/balah/Desktop/Spark/data/text/self-employment-book.txt")
+        dataframe = spark.session.read.text("file:///Users/balah/Desktop/Spark/data/text/self-employment-book.txt")
 
         # Print the schema of the DataFrame.
         # dataframe.printSchema()
@@ -22,14 +22,14 @@ if __name__ == '__main__':
         # Transform the DataFrame by exploding the lines into individual
         # lowercased words :
         # 1 - Lowercase the 'value' column to ensure uniformity.
-        transformed_column = funcs.lower('value')
+        transformed_column = spark_funcs.lower('value')
         # 2 - Split the 'value' column into words using a regex pattern that
         # matches non-word characters.
         # NOTE : Using r'\W+' (and not r'\w+') ensures we split on punctuation and whitespace,
         # effectively isolating words and ignoring punctuation.
-        transformed_column = funcs.split(transformed_column, r'\W+')
+        transformed_column = spark_funcs.split(transformed_column, r'\W+')
         # 3 - Explode the resulting array of words into individual rows.
-        transformed_column = funcs.explode(transformed_column)
+        transformed_column = spark_funcs.explode(transformed_column)
         # 4 - Finally, rename the column to 'word'.
         transformed_column = transformed_column.alias("word")
 

@@ -8,7 +8,7 @@ import os; os.environ['PYARROW_IGNORE_TIMEZONE'] = '1'
 import pyspark.pandas as ps
 import pandas as pd
 
-from src.internal.proxy_spark_session import ProxySparkSession
+from src.internal.spark.proxies import SparkSessionProxy
 
 
 if __name__ == '__main__':
@@ -19,10 +19,10 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------
     # Convert the pandas DataFrame to a Spark DataFrame with a spark session
     # ---------------------------------------------------------------------------
-    with ProxySparkSession("Test Pandas API") as spark:
+    with SparkSessionProxy("Test Pandas API") as spark:
 
         # Create a Spark DataFrame from the pandas DataFrame
-        spark_df = spark.createDataFrame(pandas_df)
+        spark_df = spark.session.createDataFrame(pandas_df)
 
         # Show the created Spark dataframe
         spark_df.show(5)

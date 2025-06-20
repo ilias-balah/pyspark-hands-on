@@ -6,9 +6,8 @@
 # need to set the environment variable before importing pyspark.pandas.
 import os; os.environ['PYARROW_IGNORE_TIMEZONE'] = '1'
 import pyspark.pandas as ps
-import pandas as pd
-import numpy as np
-from pyspark.sql import SparkSession
+from src.internal.spark.session import SparkSession
+from src.logs import logging_utils
 
 
 def _age_in_10_years(value: int) -> int:
@@ -93,9 +92,10 @@ if __name__ == '__main__':
     spark = SparkSession.builder \
         .appName("Pandas on Spark") \
         .config("spark.sql.ansi.enabled", "false") \
-        .config("spark.python.worker.faulthandler.enabled", 'true') \
         .config("spark.ExecutorEnv.PYARROW_IGNORE_TIMEZONE", "1") \
         .getOrCreate()
+    
+    logger = logging_utils.get_logger(__name__)
 
     # Create a pandas DataFrame of employees with their age and salary
     # This dataframe will have 10 rows and 4 columns: ID, name, age, and salary
@@ -111,16 +111,16 @@ if __name__ == '__main__':
     # on columns, by calculate the age in the next 10 years, and categorizing
     # the salary into 'Low', 'Medium', or 'High'.
     # -----------------------------------------------------------------------------
-    print("\nEmployees DataFrame with age in the next 10 years :")
-    # print(see_employees_age_in_10_years(pandas_df).head())
+    logger.print("Employees DataFrame with age in the next 10 years :")
+    logger.print(see_employees_age_in_10_years(pandas_df).head(), as_log = False)
 
-    print("\nEmployees DataFrame with categorized salary :")
-    print(see_employees_with_categorized_salary(pandas_df).head())
+    logger.print("Employees DataFrame with categorized salary :")
+    logger.print(see_employees_with_categorized_salary(pandas_df).head(), as_log = False)
 
     # -----------------------------------------------------------------------------
     # Practice using pandas API on Spark, with transformations and operations
     # on rows, by calculating the expected raise for each employee based on
     # their age and salary.
     # -----------------------------------------------------------------------------
-    print("\nEmployees DataFrame with expected raise :")
-    print(see_employees_with_expected_raise(pandas_df).head())
+    logger.print("Employees DataFrame with expected raise :")
+    logger.print(see_employees_with_expected_raise(pandas_df).head(), as_log = False)

@@ -1,12 +1,14 @@
 """
 Practice pyspark dataframes by converting an RDD to a DataFrame.
 """
-from src.internal.proxy_spark_session import ProxySparkSession, Row, DataFrame
+from pyspark.sql import Row, DataFrame
+from src.internal.spark.proxies import SparkSessionProxy
+
 
 
 if __name__ == '__main__':
 
-    with ProxySparkSession("RDD to dataframe") as spark:
+    with SparkSessionProxy("RDD to dataframe") as spark:
 
         def create_row(line):
             """
@@ -25,14 +27,14 @@ if __name__ == '__main__':
             return Row(id=id, name=name, age=age, num_friends=num_friends)
 
         # Read the fake friends CSV file into an RDD.
-        rdd = spark.sparkContext.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake-friends.csv")
+        rdd = spark.session.sparkContext.textFile("file:///Users/balah/Desktop/Spark/data/csv/fake-friends.csv")
 
         # Map each line to a Row object.
         rdd_rows = rdd.map(create_row)
 
         # Create a DataFrame from the RDD.
         # NOTE: We can cache the RDD to improve performance if we plan to use it multiple times.
-        dataframe: DataFrame = spark.createDataFrame(rdd_rows).cache()
+        dataframe: DataFrame = spark.session.createDataFrame(rdd_rows).cache()
 
         # Print the schema of the DataFrame.
         # dataframe.printSchema()
@@ -42,7 +44,7 @@ if __name__ == '__main__':
 
         # Excute a SQL query to get the teenagers in the DataFrame.
         # NOTE: The results of a `spark.sql` query are also a DataFrame.
-        teenagers_with_sql = spark.sql("SELECT * FROM fake_friends WHERE age >= 13 AND age <= 19 ORDER BY age, num_friends ASC")
+        teenagers_with_sql = spark.session.sql("SELECT * FROM fake_friends WHERE age >= 13 AND age <= 19 ORDER BY age, num_friends ASC")
 
         # NOTE: Alternatively, we can use pre-defined functions to query the DataFrame.
         teenagers_with_funcs = dataframe.filter("age >= 13 AND age <= 19").orderBy("age", "num_friends", ascending=True)

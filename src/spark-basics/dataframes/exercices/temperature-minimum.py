@@ -2,13 +2,13 @@
 Exercice, to calculate the minimum temperature for each year in a given dataset.
 """
 from pyspark.sql import types as st
-from src.internal.proxy_spark_session import ProxySparkSession
-from src.internal.utils.spark_function_helpers import apply_spark_function_with_alias
+from src.internal.spark.proxies import SparkSessionProxy
+from src.utils.spark_functions import apply_spark_function_with_alias, spark_funcs
 
 
 if __name__ == '__main__':
 
-    with ProxySparkSession("Exercice for spark dataframes") as spark:
+    with SparkSessionProxy("Exercice for spark dataframes") as spark:
 
         # Customize the datfarme schema
         schema = st.StructType([
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         ])
 
         # Read the temperature data CSV file into a DataFrame.
-        dataframe = spark.read.schema(schema).csv("file:///Users/balah/Desktop/Spark/data/csv/1800.csv")
+        dataframe = spark.session.read.schema(schema).csv("file:///Users/balah/Desktop/Spark/data/csv/1800.csv")
 
         # ---------------------------------------------------------------------
         # Select the minimum temerature for each station using a SQL query.
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         # NOTE: Before quering any table, we need to register the
         # dataFrame as a temporary view first.
         dataframe.createTempView("temperature_table")
-        spark.sql("""
+        spark.session.sql("""
             SELECT station_id, MIN(value) * 0.1 AS min_value
             FROM temperature_table
             WHERE element_type = 'TMIN'

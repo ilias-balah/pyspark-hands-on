@@ -2,13 +2,13 @@
 Exercice to calculate the total spending and the number of orders per customer.
 """
 from pyspark.sql import types as st
-from src.internal.proxy_spark_session import ProxySparkSession
-from src.internal.utils.spark_function_helpers import apply_spark_function_with_alias, spark_funcs
+from src.internal.spark.proxies import SparkSessionProxy
+from src.utils.spark_functions import apply_spark_function_with_alias, spark_funcs
 
 
 if __name__ == '__main__':
 
-    with ProxySparkSession("Customers' total spendings exercice") as spark_session:
+    with SparkSessionProxy("Customers' total spendings exercice") as spark:
 
         # Customize a schema fo the customer-orders dataframe
         schema = st.StructType([
@@ -18,14 +18,14 @@ if __name__ == '__main__':
         ])
 
         # Read the oredrs dataframe
-        dataframe = spark_session.read.schema(schema).csv("file:///Users/balah/Desktop/Spark/data/csv/customer-orders.csv")
+        dataframe = spark.session.read.schema(schema).csv("file:///Users/balah/Desktop/Spark/data/csv/customer-orders.csv")
 
         # ---------------------------------------------------------------------
         # Calculate the number of orders and the apent amount per customer
         # using a SQL query.
         # ---------------------------------------------------------------------
         dataframe.createTempView("customer_orders_view")
-        spark_session.sql("""
+        spark.session.sql("""
             SELECT
                 customer_id,
                 COUNT(*) AS number_of_orders,
